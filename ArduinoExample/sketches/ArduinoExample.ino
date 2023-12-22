@@ -5,12 +5,11 @@ int = integer (whole number)          - 2 bytes (16 bits) - range: -32768			to 3
 unsigned int = integer (whole number) - 2 bytes (16 bits) - range:      0			to 65535 
 
 byte = integer (whole number)         - 1 byte  ( 8 bits) - range:      0			to   255 
-unsigned byte = integer (whole number)- 1 byte  ( 8 bits) - range:      0			to   255 
 
 float = floating point number         - 4 bytes (32 bits) - range: -3.4028235E+38	to 3.4028235E+38
 double = floating point number        - 8 bytes (64 bits) - range: -1.7976931348623157E+308 to 1.7976931348623157E+308
 
-boolean = true or false               - 1 byte  ( 8 bits) - range:      0			to     1
+bool = true or false                  - 1 byte  ( 8 bits) - range:      0			to     1
 char = character                      - 1 byte  ( 8 bits) - range:      0			to   255 (ASCII table) 'A' = 65, 'B' = 66, 'C' = 67, etc.
 
 String = text                         - n bytes (n bits) Example: String myString = "Hello World!"; // 12 bytes (12*8 = 96 bits)
@@ -108,17 +107,44 @@ int secondElement = myArray[1]; // Second element in the array
  // Multiple conditions can be defined using different operators:
  // && (and)
  // || (or)
+ // ! (not)
  if(myBool == true && myBool2 == false)
  {
 	 // This will be executed
+ }
+ else if(myBool == true && myBool2 == true)
+ {
+	 // This will not be executed
  }
  else
  {
 	 // This will not be executed
  }
 
+
  
  */
+
+
+/* Switch case
+ 
+
+switch (variable)
+{
+	case 1:
+	case 2:
+		// Code here will be executed if variable is 1 or 2
+		break;
+	case 3:
+		// Code here will be executed if variable is 3
+		break;
+	default:
+		// Code here will be executed if variable is not 1, 2 or 3
+		break;
+}
+
+*/
+
 
 
 
@@ -141,7 +167,13 @@ for (int i = 0; i < 10; i++)
 */
 
 
-
+void lampeEinAus(int e, int i);
+void lampeEin(int e, int i);
+void lampeAus(int e, int i);
+void lampeReiheEin(int e, int z, int s);
+void lampeReiheAus(int e, int z, int s);
+void lampeEbeneEin(int e);
+void lampeEbeneAus(int e);
 
 
 // This function is called once at startup of the sketch
@@ -153,9 +185,15 @@ void setup()
 	// Example: pinMode(PIN_NR, OUTPUT);
 	
 	// See in the file LedCube4_hardware.h which pins are used for the layers and columns
-	pinMode(LedCube4_hardware::Layer::pins[0], OUTPUT); // Sets the pin mode of the first layer to output
-	
-	pinMode(LedCube4_hardware::Column::pins[0], OUTPUT); // Sets the pin mode of the first column to output
+	for (int i = 0; i < LedCube4_hardware::Layer::count; i++)
+	{
+		pinMode(LedCube4_hardware::Layer::pins[i], OUTPUT);
+	}
+
+	for (int i = 0; i < LedCube4_hardware::Column::count; i++)
+	{
+		pinMode(LedCube4_hardware::Column::pins[i], OUTPUT);
+	}
 }
 
 // This function is called repeatedly after setup() finishes.
@@ -164,11 +202,117 @@ void loop()
 	// Turn on the first layer
 	// Use the digitalWrite() function
 	// Example: digitalWrite(PIN_NR, HIGH);
+	/*for (int e = 0; e < 4; e++)
+	{
+		for (int i = 3; i < 16;i+=4)
+		{
+			lampeEin(e, i);
+			lampeEin(e, i-3);
+			lampeAus(e, i);
+			lampeAus(e, i-3);
+		}
+		
+	} */
+	lampeEbeneEin(4);
+	delay(1000);
+	lampeEbeneEin(3);
+	delay(1000);
+	lampeEbeneEin(2);
+	lampeEbeneAus(4);
+	delay(1000);
+	lampeEbeneEin(1);
 	
-	// See in the file LedCube4_hardware.h which pins are used for the layers and columns
-	digitalWrite(LedCube4_hardware::Layer::pins[0], HIGH); // Turns on the first layer
+	delay(1000);
+	lampeEbeneAus(3);
+	delay(1000);
+	lampeEbeneAus(2);
+	delay(1000);
+	lampeEbeneAus(1);
+}
+
+void lampeEinAus(int e, int i)
+{
+	delay(100);
+	digitalWrite(LedCube4_hardware::Layer::pins[e], HIGH);
+	digitalWrite(LedCube4_hardware::Column::pins[i], HIGH);	
+	delay(100);
+	digitalWrite(LedCube4_hardware::Layer::pins[e], LOW);
+	digitalWrite(LedCube4_hardware::Column::pins[i], LOW);
+}
+
+void lampeEin(int e, int i)
+{
+	digitalWrite(LedCube4_hardware::Layer::pins[e], HIGH);
+	digitalWrite(LedCube4_hardware::Column::pins[i], HIGH);
+}
+void lampeAus(int e, int i)
+{
+	digitalWrite(LedCube4_hardware::Layer::pins[e], LOW);
+	digitalWrite(LedCube4_hardware::Column::pins[i], LOW);
+}
+
+void lampeReiheEin(int e, int z, int s) //Reihe in einer Ebene 0 1 4
+{
+	e = e - 1;
+	if (e < 0)
+	{
+		return;
+	}
+	if (s != 0)
+	{		
+		for (int i = s-1; i < 16; i += 4) 
+		{
+			digitalWrite(LedCube4_hardware::Layer::pins[e], HIGH);
+			digitalWrite(LedCube4_hardware::Column::pins[i], HIGH);
+		}
+	}
 	
-	// Turn on the first column
-	// See in the file LedCube4_hardware.h which pins are used for the layers and columns
-	digitalWrite(LedCube4_hardware::Column::pins[0], HIGH); // Turns on the first column
+	if (z != 0)
+	{		
+		for (int i = (z-1)*4; i < z*4; i += 1) 
+		{
+			digitalWrite(LedCube4_hardware::Layer::pins[e], HIGH);
+			digitalWrite(LedCube4_hardware::Column::pins[i], HIGH);
+		}
+	}
+}
+
+void lampeReiheAus(int e, int z, int s) //Reihe in einer Ebene
+{
+	e=e-1;
+	if (e < 0)
+	{
+		return;
+	}
+	if (s != 0)
+	{		
+		for (int i = s-1; i < 16; i += 4) 
+		{
+			digitalWrite(LedCube4_hardware::Layer::pins[e], LOW);
+			digitalWrite(LedCube4_hardware::Column::pins[i], LOW);
+		}
+	}
+	
+	if (z != 0)
+	{		
+		for (int i = (z-1)*4; i < z*4; i += 1) 
+		{
+			digitalWrite(LedCube4_hardware::Layer::pins[e], LOW);
+			digitalWrite(LedCube4_hardware::Column::pins[i],LOW);
+		}
+	}
+}
+void lampeEbeneEin(int e)
+{
+	lampeReiheEin(e, 1, 0);
+	lampeReiheEin(e, 2, 0);
+	lampeReiheEin(e, 3, 0);
+	lampeReiheEin(e, 4, 0);
+}
+void lampeEbeneAus(int e)
+{
+	lampeReiheAus(e, 1, 0);
+	lampeReiheAus(e, 2, 0);
+	lampeReiheAus(e, 3, 0);
+	lampeReiheAus(e, 4, 0);
 }
